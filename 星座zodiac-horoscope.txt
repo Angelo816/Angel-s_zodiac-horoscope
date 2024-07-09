@@ -1,0 +1,119 @@
+// 星座數據
+const zodiacSigns = [
+    {name: '白羊座', date: [3, 21, 4, 19]},
+    {name: '金牛座', date: [4, 20, 5, 20]},
+    {name: '雙子座', date: [5, 21, 6, 21]},
+    {name: '巨蟹座', date: [6, 22, 7, 22]},
+    {name: '獅子座', date: [7, 23, 8, 22]},
+    {name: '處女座', date: [8, 23, 9, 22]},
+    {name: '天秤座', date: [9, 23, 10, 23]},
+    {name: '天蠍座', date: [10, 24, 11, 22]},
+    {name: '射手座', date: [11, 23, 12, 21]},
+    {name: '摩羯座', date: [12, 22, 1, 19]},
+    {name: '水瓶座', date: [1, 20, 2, 18]},
+    {name: '雙魚座', date: [2, 19, 3, 20]}
+];
+
+// 幸運提示
+const luckyHints = [
+    "今天是你的幸運日！大膽追求你的夢想。",
+    "保持樂觀，好運即將來臨。",
+    "相信你的直覺，它會引導你做出正確的決定。",
+    "堅持不懈，你的努力終將得到回報。",
+    "敞開心扉，新的機遇正等著你。"
+];
+
+document.getElementById('horoscopeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const birthdate = new Date(document.getElementById('birthdate').value);
+    const gender = document.getElementById('gender').value;
+
+    const zodiacSign = getZodiacSign(birthdate);
+    const luckyHint = getLuckyHint();
+
+    document.getElementById('zodiacSign').textContent = `您的星座是：${zodiacSign}`;
+    document.getElementById('luckyHint').textContent = `幸運提示：${luckyHint}`;
+    document.getElementById('result').classList.remove('hidden');
+});
+
+document.getElementById('downloadButton').addEventListener('click', function() {
+    document.getElementById('emailForm').classList.remove('hidden');
+});
+
+document.getElementById('submitEmail').addEventListener('click', function() {
+    const email = document.getElementById('userEmail').value;
+    if (email) {
+        localStorage.setItem('userEmail', email);
+        downloadResult();
+    } else {
+        alert('請輸入有效的email地址');
+    }
+});
+
+function getZodiacSign(date) {
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    
+    for (let sign of zodiacSigns) {
+        if ((month === sign.date[0] && day >= sign.date[1]) || 
+            (month === sign.date[2] && day <= sign.date[3])) {
+            return sign.name;
+        }
+    }
+    return zodiacSigns[9].name; // 默認返回摩羯座
+}
+
+function getLuckyHint() {
+    return luckyHints[Math.floor(Math.random() * luckyHints.length)];
+}
+
+function downloadResult() {
+    const zodiacSign = document.getElementById('zodiacSign').textContent;
+    const luckyHint = document.getElementById('luckyHint').textContent;
+    const result = `${zodiacSign}\n${luckyHint}`;
+    
+    const blob = new Blob([result], {type: 'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '星座命盤結果.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// 初始化星座選擇器
+function initZodiacSelectors() {
+    const selectors = [document.getElementById('zodiac1'), document.getElementById('zodiac2')];
+    for (let selector of selectors) {
+        for (let sign of zodiacSigns) {
+            const option = document.createElement('option');
+            option.value = sign.name;
+            option.textContent = sign.name;
+            selector.appendChild(option);
+        }
+    }
+}
+
+initZodiacSelectors();
+
+document.getElementById('checkCompatibility').addEventListener('click', function() {
+    const zodiac1 = document.getElementById('zodiac1').value;
+    const zodiac2 = document.getElementById('zodiac2').value;
+    const compatibility = getCompatibility(zodiac1, zodiac2);
+    document.getElementById('compatibilityResult').textContent = `${zodiac1}和${zodiac2}的適配度：${compatibility}`;
+    document.getElementById('compatibility').classList.remove('hidden');
+});
+
+function getCompatibility(zodiac1, zodiac2) {
+    // 這裡應該有一個更複雜的適配度算法，這只是一個簡單的示例
+    const compatibilityScores = {
+        '高': ['非常適合', '珍惜這段關係'],
+        '中': ['有潛力', '需要互相理解'],
+        '低': ['有挑戰', '需要更多溝通']
+    };
+    const score = ['高', '中', '低'][Math.floor(Math.random() * 3)];
+    const [description, advice] = compatibilityScores[score];
+    return `${score}。${description}。${advice}。`;
+}
